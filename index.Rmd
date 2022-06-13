@@ -1,0 +1,129 @@
+---
+title: "Felinos"
+author: "Andy Valverde"
+date: '2022-06-13'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(sf)
+library(ggplot2)
+library(leaflet)
+library(DT)
+library(plotly)
+library(dplyr)
+```
+
+```{r}
+# Lectura de una capa vectorial (GeoJSON) de provincias de Costa Rica
+
+provincias <- # objeto sf de datos vectoriales con geometrías de multipolígonos
+  st_read(
+    "c:/users/c09291/documents/provincias.geojson", # archivo de datos de entrada
+    quiet = TRUE
+  ) %>%
+  st_transform(4326) # transformación al sistema de coordenadas WGS84
+```
+
+```{r}
+# Lectura de una capa raster (GeoTIFF) de altitud de Costa Rica
+
+altitud <- # objeto tipo SpatRaster
+  rast(
+    "c:/users/c09291/documents/altitud.tif" # archivo de datos de entrada
+  )
+```
+
+```{r}
+# Lectura de un archivo CSV con registros de presencia de felinos de Costa Rica
+felinos <- # objeto sf de datos vectoriales con geometrías de puntos
+  st_read(
+    "c:/users/c09291/documents/felinos.csv", # archivo de datos de entrada
+    options = c(
+      "X_POSSIBLE_NAMES=decimalLongitude", # columna de longitud decimal
+      "Y_POSSIBLE_NAMES=decimalLatitude"  # columna de latitud decimal
+    ),
+    quiet = TRUE
+  )
+
+# Asignación del sistema de coordenadas WGS84 al objeto felinos
+st_crs(felinos) <- 4326
+```
+
+```{r}
+# Tabla interactiva del paquete DT
+
+felinos %>%
+  st_drop_geometry() %>% # se suprime la columna de geometría
+  dplyr::select(species,
+                # selección de columnas
+                eventDate,
+                stateProvince,
+                locality,
+                decimalLongitude,
+                decimalLatitude) %>%
+  datatable(
+    options = list(
+      pageLength = 5,
+      # cantidad de registros en una página
+      language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json') # traducción al español
+    ),
+    colnames = c(
+      # encabezados de las columnas
+      "Especie",
+      "Fecha",
+      "Provincia",
+      "Localidad",
+      "Longitud",
+      "Latitud"
+    )
+  )
+```
+
+```{r}
+# Gráfico de barras de cantidad de registros por especie
+
+# Gráfico ggplot2
+grafico_registros_x_especie <-
+  felinos %>%
+  count(species) %>% # se realiza primero el conteo de registros por especies, para luego facilitar el ordenamiento de las barras
+  ggplot(aes(x = reorder(species, n), y = n)) +
+  geom_bar(stat = "identity") +
+  xlab("Especie") +
+  ylab("Registros de presencia") +
+  coord_flip() + # inversión de ejes
+  theme_minimal()
+
+# Gráfico plotly
+grafico_registros_x_especie %>%
+  ggplotly() %>% 
+  config(locale = 'es') # traducción de etiquetas al español
+```
+
+```{r}
+# Mapa leaflet básico con capas de altitud, provincias y registros de presencia de felinos
+
+leaflet() %>%
+  addTiles() %>% # capa base de OSM
+  addPolygons( # capa vectorial de polígonos de provincias
+    data = provincias,
+    color = "black",
+    fillColor = "transparent",
+    stroke = TRUE,
+    weight = 1.0,
+  ) %>%
+  addCircleMarkers( # capa vectorial de puntos de registros de presencia
+    data = felinos,
+    stroke = F,
+    radius = 4,
+    fillColor = 'blue',
+    fillOpacity = 1
+  )
+```
+
+
