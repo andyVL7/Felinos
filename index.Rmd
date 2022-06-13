@@ -2,14 +2,23 @@
 title: "Felinos"
 author: "Andy Valverde"
 date: '2022-06-13'
-output: html_document
+output:
+  html_document:
+    theme: readable    
+    toc: true
+    toc_depth: 5
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+# Carga de paquetes
+
+```{r, message=FALSE}
 library(dplyr)
 library(sf)
 library(ggplot2)
@@ -19,7 +28,9 @@ library(plotly)
 library(dplyr)
 ```
 
-```{r}
+# Carga de Capa Provincias
+
+```{r, message=FALSE}
 # Lectura de una capa vectorial (GeoJSON) de provincias de Costa Rica
 
 provincias <- # objeto sf de datos vectoriales con geometrías de multipolígonos
@@ -30,7 +41,9 @@ provincias <- # objeto sf de datos vectoriales con geometrías de multipolígono
   st_transform(4326) # transformación al sistema de coordenadas WGS84
 ```
 
-```{r}
+# Carga de dato Felinos
+
+```{r, message=FALSE}
 # Lectura de un archivo CSV con registros de presencia de felinos de Costa Rica
 felinos <- # objeto sf de datos vectoriales con geometrías de puntos
   st_read(
@@ -46,7 +59,11 @@ felinos <- # objeto sf de datos vectoriales con geometrías de puntos
 st_crs(felinos) <- 4326
 ```
 
-```{r}
+# Visualizaciones de datos
+## Tablas
+### Registros de presencia
+
+```{r, message=FALSE}
 # Tabla interactiva del paquete DT
 
 felinos %>%
@@ -76,7 +93,10 @@ felinos %>%
   )
 ```
 
-```{r}
+## Gráficos
+### Registros de presencia por especie
+
+```{r, message=FALSE}
 # Gráfico de barras de cantidad de registros por especie
 
 # Gráfico ggplot2
@@ -96,7 +116,10 @@ grafico_registros_x_especie %>%
   config(locale = 'es') # traducción de etiquetas al español
 ```
 
-```{r}
+## Mapa
+### Registros de presencia
+
+```{r, message=FALSE}
 # Mapa leaflet básico con capas de altitud, provincias y registros de presencia de felinos
 
 leaflet() %>%
