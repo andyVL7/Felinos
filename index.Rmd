@@ -24,19 +24,10 @@ library(dplyr)
 
 provincias <- # objeto sf de datos vectoriales con geometrías de multipolígonos
   st_read(
-    "c:/users/c09291/documents/provincias.geojson", # archivo de datos de entrada
+    "c:/users/c09291/documents/provincias.gpkg", # archivo de datos de entrada
     quiet = TRUE
   ) %>%
   st_transform(4326) # transformación al sistema de coordenadas WGS84
-```
-
-```{r}
-# Lectura de una capa raster (GeoTIFF) de altitud de Costa Rica
-
-altitud <- # objeto tipo SpatRaster
-  rast(
-    "c:/users/c09291/documents/altitud.tif" # archivo de datos de entrada
-  )
 ```
 
 ```{r}
@@ -121,7 +112,7 @@ leaflet() %>%
     data = felinos,
     stroke = F,
     radius = 4,
-    fillColor = 'blue',
+    fillColor = 'black',
     fillOpacity = 1
   )
 ```
